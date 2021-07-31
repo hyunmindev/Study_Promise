@@ -1,0 +1,13 @@
+{
+  "name": "promise",
+  "version": "1.0.0",
+  "description": "",
+  "main": "promise",
+  "scripts": {
+    "promise" : "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module"
+}
