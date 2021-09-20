@@ -1,22 +1,15 @@
 import Promise from './promise.js';
 
-function testPromise(isSuccess) {
+function myFunc(value) {
   return new Promise((resolve, reject) => {
-    if (isSuccess) {
-      resolve('then');
-    } else {
-      reject('catch');
-    }
+    setTimeout(() => {
+      if (value) {
+        resolve('resolve');
+      } else {
+        reject('reject');
+      }
+    }, 1000);
   });
 }
 
-testPromise(false) //
-    .then((value) => {
-      console.log(value);
-    }) //
-    .catch((error) => {
-      console.error(error);
-    }) //
-    .finally(() => {
-      console.log('finally');
-    });
+myFunc(true).then((result) => console.log(result));

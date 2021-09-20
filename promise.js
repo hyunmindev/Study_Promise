@@ -1,5 +1,5 @@
 export default class Promise {
-  #status = 'pending';
+  #state = 'pending';
   #value;
   #onResolvedCallbacks = [];
   #onRejectedCallbacks = [];
@@ -10,7 +10,7 @@ export default class Promise {
     const resolve = (value) => {
       console.log('resolve called');
       this.#value = value;
-      this.#status = 'resolved';
+      this.#state = 'resolved';
       this.#onResolvedCallbacks.forEach((callback) => {
         callback(value);
       });
@@ -19,7 +19,7 @@ export default class Promise {
     const reject = (value) => {
       console.log('reject called');
       this.#value = value;
-      this.#status = 'rejected';
+      this.#state = 'rejected';
       this.#onRejectedCallbacks.forEach((callback) => {
         callback(value);
       });
@@ -30,25 +30,25 @@ export default class Promise {
   }
 
   then(onResolved) {
-    if (this.#status === 'pending') {
+    if (this.#state === 'pending') {
       this.#onResolvedCallbacks.push(onResolved);
-    } else if (this.#status === 'resolved') {
+    } else if (this.#state === 'resolved') {
       onResolved(this.#value);
     }
     return this;
   }
 
   catch(onRejected) {
-    if (this.#status === 'pending') {
+    if (this.#state === 'pending') {
       this.#onRejectedCallbacks.push(onRejected);
-    } else if (this.#status === 'rejected') {
+    } else if (this.#state === 'rejected') {
       onRejected(this.#value);
     }
     return this;
   }
 
   finally(callBack) {
-    if (this.#status !== 'pending') {
+    if (this.#state !== 'pending') {
       callBack();
     }
   }
