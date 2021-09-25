@@ -1,4 +1,4 @@
-export default class Promise {
+class Promise {
   #value = null;
   #state = 'pending';
   #onFulfilledCallbacks = [];
@@ -73,3 +73,42 @@ export default class Promise {
     }
   }
 }
+
+function myResolve() {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve('my resolve'), 1000);
+  });
+}
+
+function myNextResolve(result) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => resolve(`next ${result}`), 1000);
+  });
+}
+
+myResolve() //
+    .then((result) => {
+      console.log(result);
+      return myNextResolve();
+    }) //
+    .then((result) => {
+      console.log(result);
+    }) //
+    .finally(() => {
+      console.log('finally called');
+      return myNextResolve('finally promise');
+    }) //
+    .then((result) => {
+      console.log(result);
+      return myNextResolve('after');
+    }) //
+    .then((result) => {
+      console.log('result', result);
+    }) //
+    .finally(() => {
+      console.log('second finally');
+      throw 'last error';
+    }) //
+    .catch((error) => {
+      console.log(error);
+    });
