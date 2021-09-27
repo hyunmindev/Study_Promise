@@ -6,6 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="6f8ff1b4-72b4-4ef5-acc9-8815d953cf77" name="Changes" comment="feat: Add asynchronous feature">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/posting/5.js" beforeDir="false" afterPath="$PROJECT_DIR$/posting/5.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/posting/6.js" beforeDir="false" afterPath="$PROJECT_DIR$/posting/6.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/posting/7.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/promise.js" beforeDir="false" afterPath="$PROJECT_DIR$/promise.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +75,10 @@
       <workItem from="1632655587526" duration="12789000" />
       <workItem from="1632701594388" duration="2637000" />
       <workItem from="1632708261089" duration="1730000" />
-      <workItem from="1632724736018" duration="11599000" />
+      <workItem from="1632724736018" duration="12381000" />
+      <workItem from="1632747571544" duration="325000" />
+      <workItem from="1632748483363" duration="2426000" />
+      <workItem from="1632750984646" duration="1674000" />
     </task>
     <servers />
   </component>

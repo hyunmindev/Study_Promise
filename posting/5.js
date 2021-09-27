@@ -50,7 +50,16 @@ class Promise {
   handleCallback(callback, resolve, reject) {
     const result = callback(this.value);
     if (result instanceof Promise) { // 🌟
-      result.then(resolve);
+      if (result.state === 'fulfilled') {
+        result.then(resolve);
+      }
+      if (result.state === 'rejected') {
+        result.catch(reject);
+      }
+      if (result.state === 'pending') {
+        result.onFulfilledCallback = () => result.then(resolve);
+        result.onRejectedCallback = () => result.catch(reject);
+      }
     } else {
       resolve(result);
     }

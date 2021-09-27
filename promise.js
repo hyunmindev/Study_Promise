@@ -88,10 +88,16 @@ export default class Promise {
     try {
       const result = callback(this.#value);
       if (result instanceof Promise) {
-        if (result.state === 'rejected') {
-          result.catch(reject);
-        } else {
+        if (result.#state === 'fulfilled') {
+          console.log('tes');
           result.then(resolve);
+        }
+        if (result.#state === 'rejected') {
+          result.catch(reject);
+        }
+        if (result.#state === 'pending') {
+          result.#onFulfilledCallback = () => result.then(resolve);
+          result.#onRejectedCallback = () => result.catch(reject);
         }
       } else {
         resolve(result);
