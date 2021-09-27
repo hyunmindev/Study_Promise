@@ -1,18 +1,22 @@
 class Promise {
   constructor(callback) {
     this.state = 'pending';
-    this.onFulfilledCallbacks = [];
-    this.onRejectedCallbacks = [];
+    this.onFulfilledCallback = null;
+    this.onRejectedCallback = null;
 
     const resolve = (value) => {
       this.state = 'fulfilled';
       this.value = value;
-      this.onFulfilledCallbacks.forEach((callback) => callback(value));
+      if (this.onFulfilledCallback !== null) {
+        this.onFulfilledCallback(value);
+      }
     };
     const reject = (value) => {
       this.state = 'rejected';
       this.value = value;
-      this.onRejectedCallbacks.forEach((callback) => callback(value));
+      if (this.onRejectedCallback !== null) {
+        this.onRejectedCallback(value);
+      }
     };
     callback(resolve, reject);
   }
@@ -20,22 +24,12 @@ class Promise {
   then(callback) {
     return new Promise((resolve, reject) => {
       if (this.state === 'pending') {
-        this.onFulfilledCallbacks.push(() => {
-            const result = callback(this.value);
-            if (result instanceof Promise) {
-              result.then(resolve);
-            } else {
-              resolve(result);
-            }
-        });
+        this.onFulfilledCallback = () => {
+          this.handleCallback(callback, resolve);
+        };
       }
       if (this.state === 'fulfilled') {
-        const result = callback(this.value);
-        if (result instanceof Promise) {
-          result.then(resolve);
-        } else {
-          resolve(result);
-        }
+        this.handleCallback(callback, resolve);
       }
     });
   }
@@ -43,24 +37,23 @@ class Promise {
   catch(callback) {
     return new Promise((resolve, reject) => {
       if (this.state === 'pending') {
-        this.onRejectedCallbacks.push(() => {
-          const result = callback(this.value);
-          if (result instanceof Promise) {
-            result.then(resolve);
-          } else {
-            resolve(result);
-          }
-        });
+        this.onRejectedCallback = () => {
+          this.handleCallback(callback, resolve);
+        };
       }
       if (this.state === 'rejected') {
-        const result = callback(this.value);
-        if (result instanceof Promise) {
-          result.then(resolve);
-        } else {
-          resolve(result);
-        }
+        this.handleCallback(callback, resolve);
       }
     });
+  }
+
+  handleCallback(callback, resolve, reject) {
+    const result = callback(this.value);
+    if (result instanceof Promise) { // 🌟
+      result.then(resolve);
+    } else {
+      resolve(result);
+    }
   }
 }
 
@@ -70,20 +63,6 @@ function myResolve() {
   });
 }
 
-function myNextResolve(result) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve(`next ${result}`), 1000);
-  });
-}
-
 myResolve() //
-    .then((result) => {
-      console.log(result);
-      return myNextResolve();
-    }) //
-    .then((result) => {
-      console.log(result);
-    }); //
-
-
-
+    .then((result) => `next ${result}`) //
+    .then((result) => console.log(result)); // next my resolve

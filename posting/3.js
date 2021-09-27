@@ -1,25 +1,29 @@
 class Promise {
   constructor(callback) {
     this.state = 'pending';
-    this.onFulfilledCallbacks = [];
-    this.onRejectedCallbacks = [];
+    this.onFulfilledCallback = null;
+    this.onRejectedCallback = null;
 
     const resolve = (value) => {
       this.state = 'fulfilled';
       this.value = value;
-      this.onFulfilledCallbacks.forEach((callback) => callback(value));
+      if (this.onFulfilledCallback !== null) {
+        this.onFulfilledCallback(value);
+      }
     };
     const reject = (value) => {
       this.state = 'rejected';
       this.value = value;
-      this.onRejectedCallbacks.forEach((callback) => callback(value));
+      if (this.onRejectedCallback !== null) {
+        this.onRejectedCallback(value);
+      }
     };
     callback(resolve, reject);
   }
 
   then(callback) {
     if (this.state === 'pending') {
-      this.onFulfilledCallbacks.push(callback);
+      this.onFulfilledCallback = callback;
     }
     if (this.state === 'fulfilled') {
       callback(this.value);
@@ -29,7 +33,7 @@ class Promise {
 
   catch(callback) {
     if (this.state === 'pending') {
-      this.onRejectedCallbacks.push(callback);
+      this.onRejectedCallback = callback;
     }
     if (this.state === 'rejected') {
       callback(this.value);
@@ -40,20 +44,10 @@ class Promise {
 
 function myResolve() {
   return new Promise((resolve, reject) => {
+    // resolve('my resolve');
     setTimeout(() => resolve('my resolve'), 1000);
   });
 }
 
-function myReject() {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => resolve('my reject'), 1000);
-  });
-}
-
 myResolve() //
-    .then((result) => console.log(0, result)) // my resolve
-    .catch((result) => console.log(result)); //
-
-myReject() //
-    .then((result) => console.log(result)) //
-    .catch((result) => console.log(result)); // my reject
+    .then((result) => console.log(result)); // my resolve

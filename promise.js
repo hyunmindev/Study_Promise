@@ -1,87 +1,98 @@
 export default class Promise {
-  get onFulfilledCallbacks() {
-    return this.#onFulfilledCallbacks;
+  #value = null;
+  #state = 'pending';
+  #child = null;
+  #onFulfilledCallback = null;
+  #onRejectedCallback = null;
+  #onFinallyCallback = () => {};
+
+  constructor(callback) {
+    callback(this.#resolve, this.#reject);
   }
 
-  get onRejectedCallbacks() {
-    return this.#onRejectedCallbacks;
-  }
-
-  get onFinallyCallbacks() {
-    return this.#onFinallyCallbacks;
-  }
-
-  #value;
-  #state;
-  #onFulfilledCallbacks = [];
-  #onRejectedCallbacks = [];
-  #onFinallyCallbacks = [];
-  #root;
-
-  constructor(callback, state = 'pending', value = null, root = this) {
-    this.#state = state;
-    this.#value = value;
-    this.#root = root;
-
-    const resolve = (value) => {
+  #resolve = (value) => {
+    if (this.#state === 'pending') {
       this.#state = 'fulfilled';
       this.#value = value;
-      this.#onFulfilledCallbacks.forEach((onFulfilled) => onFulfilled(value));
-      this.#onFinallyCallbacks.forEach((onFinally) => onFinally());
-    };
-    const reject = (value) => {
+      this.#onFinallyCallback();
+      if (this.#onFulfilledCallback !== null) {
+        this.#onFulfilledCallback(value);
+      } else {
+        this.#child?.#resolve(value);
+      }
+    }
+  };
+
+  #reject = (value) => {
+    if (this.#state === 'pending') {
       this.#state = 'rejected';
       this.#value = value;
-      this.#onRejectedCallbacks.forEach((onRejected) => onRejected(value));
-      this.#onFinallyCallbacks.forEach((onFinally) => onFinally());
-    };
-    callback(resolve, reject);
-  }
+      this.#onFinallyCallback();
+      if (this.#onRejectedCallback !== null) {
+        this.#onRejectedCallback();
+      } else {
+        this.#child?.#reject(value);
+      }
+    }
+  };
 
   then(callback) {
-    return new Promise((resolve, reject) => {
+    this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#root.#onFulfilledCallbacks.push(() => {
+        this.#onFulfilledCallback = () => {
           this.#handleCallback(callback, resolve, reject);
-        });
+        };
       }
       if (this.#state === 'fulfilled') {
         this.#handleCallback(callback, resolve, reject);
       }
-    }, this.#state, this.#value, this.#root);
+      if (this.#state === 'rejected') {
+        reject(this.#value);
+      }
+    });
+    return this.#child;
   }
 
   catch(callback) {
-    return new Promise((resolve, reject) => {
+    this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#root.#onRejectedCallbacks.push(() => {
+        this.#onRejectedCallback = () => {
           this.#handleCallback(callback, resolve, reject);
-        });
+        };
       }
       if (this.#state === 'rejected') {
         this.#handleCallback(callback, resolve, reject);
       }
-    }, this.#state, this.#value, this.#root);
+      if (this.#state === 'fulfilled') {
+        resolve(this.#value);
+      }
+    });
+    return this.#child;
   }
 
   finally(callback) {
-    return new Promise((resolve, reject) => {
+    this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#root.#onFinallyCallbacks.push(() => {
+        this.#onFinallyCallback = () => {
           this.#handleCallback(callback, resolve, reject);
-        });
+        };
       }
       if (this.#state === 'fulfilled' || this.#state === 'rejected') {
         this.#handleCallback(callback, resolve, reject);
       }
-    }, this.#state, this.#value, this.#root);
+    });
+    return this.#child;
   }
 
   #handleCallback(callback, resolve, reject) {
     try {
       const result = callback(this.#value);
       if (result instanceof Promise) {
-        result.then(resolve);
+        if (result.state === 'rejected') {
+          result.catch(reject);
+        } else {
+          result.then(resolve);
+        }
       } else {
         resolve(result);
       }
