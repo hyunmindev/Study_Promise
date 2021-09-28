@@ -1,13 +1,17 @@
 {
   "name": "promise",
   "version": "1.0.0",
-  "description": "",
-  "main": "promise",
-  "scripts": {
-    "promise" : "node index.js"
-  },
+  "description": "Custom promise.",
+  "main": "promise.js",
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "author": {
+    "name": "Hyunmin Jung",
+    "email": "jung@hyunmin.dev",
+    "url": "https://hyunmin.dev"
+  },
+  "license": "MIT",
+  "type": "module",
+  "files": [
+    "promise.js"
+  ]
 }
