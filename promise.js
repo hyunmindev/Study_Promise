@@ -2,9 +2,9 @@ export default class Promise {
   #value = null;
   #state = 'pending';
   #child = null;
-  #onFulfilledCallback = null;
-  #onRejectedCallback = null;
-  #onFinallyCallback = () => {};
+  #onFulfilledCallbacks = [];
+  #onRejectedCallbacks = [];
+  #onFinallyCallbacks = [];
 
   constructor(callback) {
     callback(this.#resolve, this.#reject);
@@ -14,9 +14,9 @@ export default class Promise {
     if (this.#state === 'pending') {
       this.#state = 'fulfilled';
       this.#value = value;
-      this.#onFinallyCallback();
-      if (this.#onFulfilledCallback !== null) {
-        this.#onFulfilledCallback(value);
+      this.#onFinallyCallbacks.forEach((callback) => callback());
+      if (this.#onFulfilledCallbacks.length !== 0) {
+        this.#onFulfilledCallbacks.forEach((callback) => callback(value));
       } else {
         this.#child?.#resolve(value);
       }
@@ -27,9 +27,9 @@ export default class Promise {
     if (this.#state === 'pending') {
       this.#state = 'rejected';
       this.#value = value;
-      this.#onFinallyCallback();
-      if (this.#onRejectedCallback !== null) {
-        this.#onRejectedCallback();
+      this.#onFinallyCallbacks.forEach((callback) => callback());
+      if (this.#onRejectedCallbacks.length !== 0) {
+        this.#onRejectedCallbacks.forEach((callback) => callback(value));
       } else {
         this.#child?.#reject(value);
       }
@@ -39,9 +39,9 @@ export default class Promise {
   then(callback) {
     this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#onFulfilledCallback = () => {
+        this.#onFulfilledCallbacks.push(() => {
           this.#handleCallback(callback, resolve, reject);
-        };
+        });
       }
       if (this.#state === 'fulfilled') {
         this.#handleCallback(callback, resolve, reject);
@@ -56,9 +56,9 @@ export default class Promise {
   catch(callback) {
     this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#onRejectedCallback = () => {
+        this.#onRejectedCallbacks.push(() => {
           this.#handleCallback(callback, resolve, reject);
-        };
+        });
       }
       if (this.#state === 'rejected') {
         this.#handleCallback(callback, resolve, reject);
@@ -73,9 +73,9 @@ export default class Promise {
   finally(callback) {
     this.#child = new Promise((resolve, reject) => {
       if (this.#state === 'pending') {
-        this.#onFinallyCallback = () => {
+        this.#onFinallyCallbacks.push(() => {
           this.#handleCallback(callback, resolve, reject);
-        };
+        });
       }
       if (this.#state === 'fulfilled' || this.#state === 'rejected') {
         this.#handleCallback(callback, resolve, reject);
@@ -95,8 +95,8 @@ export default class Promise {
           result.catch(reject);
         }
         if (result.#state === 'pending') {
-          result.#onFulfilledCallback = () => result.then(resolve);
-          result.#onRejectedCallback = () => result.catch(reject);
+          result.#onFulfilledCallbacks.push(() => result.then(resolve));
+          result.#onRejectedCallbacks.push(() => result.catch(reject));
         }
       } else {
         resolve(result);
