@@ -89,7 +89,6 @@ export default class Promise {
       const result = callback(this.#value);
       if (result instanceof Promise) {
         if (result.#state === 'fulfilled') {
-          console.log('tes');
           result.then(resolve);
         }
         if (result.#state === 'rejected') {
