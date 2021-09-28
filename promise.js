@@ -1,4 +1,4 @@
-export default class Promise {
+module.exports = class Promise {
   #value = null;
   #state = 'pending';
   #child = null;
